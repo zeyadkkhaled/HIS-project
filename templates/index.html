@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% block title %}
+    Admin Page
+{% endblock %}
+
+{% block content %}
+    <style>
+        /* Adjust dropdown position to top-left below navbar */
+        .top-left-dropdown {
+            position: absolute;
+            top: 60px; /* Adjust according to your navbar height */
+            left: 10px; /* Adjust distance from the left edge */
+            z-index: 1000;
+        }
+    </style>
+
+    <div class="container">
+        <!-- Dropdown for Role Selection -->
+        <div class="btn-group top-left-dropdown">
+            <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                Choose Role
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" id="roleDropdown">
+                <li><button class="dropdown-item" type="button" onclick="showTable('admins')">Admins</button></li>
+                <li><button class="dropdown-item" type="button" onclick="showTable('patients')">Patients</button></li>
+                <li><button class="dropdown-item" type="button" onclick="showTable('radiologists')">Radiologists</button></li>
+            </ul>
+        </div>
+
+            {# Admins Table #}
+        <div id="adminsTable">
+            <h2>Admins</h2>
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">First name</th>
+                    <th scope="col">Last name</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Password</th>
+                    <th scope="col">Options</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for userdata in usersdata %}
+                    <tr>
+                        <td>{{ userdata['id'] }}</td>
+                        <td>{{ userdata['firstname'] }}</td>
+                        <td>{{ userdata['lastname'] }}</td>
+                        <td>{{ userdata['email'] }}</td>
+                        <td>{{ userdata['password'] }}</td>
+                        <td>
+                            <a class="btn btn-success" href="/edit/{{ userdata['id'] }}/1">Edit</a>
+                            <a class="btn btn-danger" href="/delete/{{ userdata['id'] }}/1">Delete</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+            {# Patients Table #}
+        <div id="patientsTable" style="display: none;">
+            <h2>Patients</h2>
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">First name</th>
+                    <th scope="col">Last name</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Password</th>
+                    <th scope="col">Gender</th>
+                    <th scope="col">Phone Number</th>
+                    <th scope="col">Address</th>
+                    <th scope="col">Radiologist ID</th>
+                    <th scope="col">Options</th>
+
+                </tr>
+                </thead>
+                <tbody>
+                {% for patient in patientsdata %}
+                    <tr>
+                        <td>{{ patient['patientid'] }}</td>
+                        <td>{{ patient['firstname'] }}</td>
+                        <td>{{ patient['lastname'] }}</td>
+                        <td>{{ patient['email'] }}</td>
+                        <td>{{ patient['password'] }}</td>
+                        <td>{{ patient['sex'] }}</td>
+                        <td>{{ patient['phonenumber'] }}</td>
+                        <td>{{ patient['address'] }}</td>
+                        <td>{{ patient['radiologistid'] }}</td>
+                        <td>
+                                <a class="btn btn-success" href="/edit/{{ patient['patientid'] }}/2">Edit</a>
+                                <a class="btn btn-danger" href="/delete/{{ patient['patientid'] }}/2">Delete</a>
+                            </td>
+
+
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+            {# Radiologists Table #}
+        <div id="radiologistsTable" style="display: none;">
+            <h2>Radiologists</h2>
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">First name</th>
+                    <th scope="col">Last name</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Password</th>
+                    <th scope="col">Gender</th>
+                    <th scope="col">Phone Number</th>
+                    <th scope="col">Salary</th>
+                    <th scope="col">Hire Date</th>
+                    <th scope="col">Options</th>
+
+                </tr>
+                </thead>
+                <tbody>
+                {% for radiologist in radiologistsdata %}
+                    <tr>
+                        <td>{{ radiologist['radiologistid'] }}</td>
+                        <td>{{ radiologist['firstname'] }}</td>
+                        <td>{{ radiologist['lastname'] }}</td>
+                        <td>{{ radiologist['email'] }}</td>
+                        <td>{{ radiologist['password'] }}</td>
+                        <td>{{ radiologist['sex'] }}</td>
+                        <td>{{ radiologist['phonenumber'] }}</td>
+                        <td>{{ radiologist['salary'] }}</td>
+                        <td>{{ radiologist['hiredate'] }}</td>
+                        <td>
+                                    <a class="btn btn-success" href="/edit/{{ radiologist['radiologistid'] }}/3">Edit</a>
+                                    <a class="btn btn-danger" href="/delete/{{ radiologist['radiologistid'] }}/3">Delete</a>
+                        </td>
+
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- JavaScript for Table Switching -->
+    <script>
+        function showTable(role) {
+            // Hide all tables first
+            document.getElementById('adminsTable').style.display = 'none';
+            document.getElementById('patientsTable').style.display = 'none';
+            document.getElementById('radiologistsTable').style.display = 'none';
+
+            // Show the selected table
+            if (role === 'admins') {
+                document.getElementById('adminsTable').style.display = 'block';
+            } else if (role === 'patients') {
+                document.getElementById('patientsTable').style.display = 'block';
+            } else if (role === 'radiologists') {
+                document.getElementById('radiologistsTable').style.display = 'block';
+            }
+        }
+    </script>
+{% endblock %}

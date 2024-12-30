@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="/static/radiologistStyles.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Radiologist Dashboard</title>
+</head>
+
+<body>
+{% if radiologist %}
+    <div class="container">
+    <header>
+        <h1>{{ radiologist['firstname'] }} {{ radiologist['lastname'] }}</h1>
+        <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+    </header>
+
+    <div class="profile">
+    <div class="left">
+        {% if radiologist['profile_picture'] %}
+            <img src="{{ radiologist['profile_picture'] }}" alt="Profile Picture" id="profilePicture"
+                 class="img-fluid rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover;">
+        {% else %}
+            <img src="static/images/uploadimage.png" alt="Profile Picture" id="profilePicture">
+        {% endif %}
+        <form action="{{ url_for('upload_profile_picture') }}" method="post" enctype="multipart/form-data">
+            {#\ this enc enables server to handle file uploads#}
+            {% if msg %}
+                <div class="alert alert-warning" role="alert">
+                    {{ msg }}
+                </div>
+            {% endif %}
+            <label for="editProfilePic" class="btn btn-primary" style="margin-bottom:10px">Change Profile
+                Picture</label>
+            <input type="file" id="editProfilePic" name="editProfilePic" class="form-control d-none"
+                   onchange="updateProfilePicture()">
+            <button type="submit">Upload</button>
+        </form>
+        <button class="btn btn-primary mt-2" id="editPersonalInfo" data-bs-toggle="modal"
+                data-bs-target="#editInfoModal">Edit Personal Info
+        </button>
+
+        <h2>Radiologist Profile</h2>
+        <p><strong>First Name:</strong> {{ radiologist['firstname'] }}</p>
+        <p><strong>Last Name:</strong> {{ radiologist['lastname'] }}</p>
+        <p><strong>Email:</strong> {{ radiologist['email'] }}</p>
+        <p><strong>Phone:</strong> {{ radiologist['phonenumber'] or 'Not provided' }}</p>
+        <p><strong>Gender:</strong> {{ radiologist['sex'] }}</p>
+        <p><strong>Salary:</strong> ${{ radiologist['salary'] }}</p>
+    </div>
+
+    <div class="right">
+    <h2>Appointments</h2>
+    {% if appointments %}
+        <table>
+            <thead>
+            <tr>
+                <th>Patient Name</th>
+                <th>Patient ID</th>
+                <th>Appointment Date</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for appointment in appointments %}
+                <tr>
+                    <td>{{ appointment['patientname'] }}</td>
+                    <td>{{ appointment['patientid'] }}</td>
+                    <td>{{ appointment['appointmentdate'] }}</td>
+                    <td>{{ appointment['timeslot'] }}</td>
+                    <td>{{ appointment['status'] }}</td>
+                    <td class="d-flex justify-content-center gap-2">
+                        <a class="btn btn-success"
+                           href="/action/{{ appointment['appointmentid'] }}/1">Confirm</a>
+                        <a class="btn btn-primary"
+                           href="/action/{{ appointment['appointmentid'] }}/2">Postpone</a>
+                        <a class="btn btn-danger" href="/action/{{ appointment['appointmentid'] }}/3">Cancel</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No appointments yet.</p>
+    {% endif %}
+
+    <h2>Scans</h2>
+    {% if scans %}
+        <table>
+            <thead>
+            <tr>
+                <th>Patient ID</th>
+                <th>Scan</th>
+
+            </tr>
+            </thead>
+            <tbody>
+            {% for scan in scans %}
+                <tr>
+                    <td>{{ scan['patientid'] }}</td>
+                    <td><a href="{{ scan['scans'] }}" download>{{ scan['scans'] }}</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Patient scan information will appear here.</p>
+    {% endif %}
+
+    <script>
+        function updateProfilePicture() {
+            const fileInput = document.getElementById('editProfilePic');
+            const profilePicture = document.getElementById('profilePicture');
+            const file = fileInput.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    profilePicture.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+    <div class="modal fade" id="editInfoModal" tabindex="-1" aria-labelledby="editInfoModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editInfoModalLabel">Edit Personal Information</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editInfoForm" action="/edit_personal_info" method="POST"
+                          onsubmit="return validatePasswords()">
+
+                        <div class="mb-3">
+                            <label for="firstname" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="firstname" name="firstname"
+                                   value="{{ radiologist['firstname'] }}" required>
+                        </div>
+
+
+                        <div class="mb-3">
+                            <label for="lastname" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="lastname" name="lastname"
+                                   value="{{ radiologist['lastname'] }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="gender" class="form-label">Gender</label>
+                            <select class="form-select" id="gender" name="gender" required>
+                                <option value="Male"
+                                        {% if radiologist['gender'] == 'Male' %}selected{% endif %}>Male
+                                </option>
+                                <option value="Female"
+                                        {% if radiologist['gender'] == 'Female' %}selected{% endif %}>Female
+                                </option>
+                                <option value="Other"
+                                        {% if radiologist['gender'] == 'Other' %}selected{% endif %}>Other
+                                </option>
+                            </select>
+                        </div>
+
+
+                        <div class="mb-3">
+                            <label for="phonenumber" class="form-label">Contact</label>
+                            <input type="text" class="form-control" id="phonenumber" name="phonenumber"
+                                   value="{{ radiologist['phonenumber'] }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Change Password</label>
+                            <select class="form-select" id="changePasswordDropdown"
+                                    onchange="togglePasswordFields()">
+                                <option value="no">Do not change</option>
+                                <option value="yes">Change Password</option>
+                            </select>
+                        </div>
+
+                        <div id="passwordFields" style="display: none;">
+
+                            <div class="mb-3">
+                                <label for="newPassword" class="form-label">New Password</label>
+                                <input type="password" class="form-control" id="newPassword"
+                                       name="newPassword">
+                            </div>
+
+
+                            <div class="mb-3">
+                                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                                <input type="password" class="form-control" id="confirmPassword"
+                                       name="confirmPassword">
+                            </div>
+
+                            <div id="passwordError" class="text-danger" style="display: none;">
+                                Passwords do not match. Please try again.
+                            </div>
+                        </div>
+
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close
+                            </button>
+                            <button type="submit" class="btn btn-primary btn-block">Save changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle visibility of password fields based on dropdown selection
+        function togglePasswordFields() {
+            const passwordFields = document.getElementById('passwordFields');
+            const changePasswordDropdown = document.getElementById('changePasswordDropdown');
+
+            if (changePasswordDropdown.value === 'yes') {
+                passwordFields.style.display = 'block';
+            } else {
+                passwordFields.style.display = 'none';
+            }
+        }
+
+        // Validate that the new password and confirm password match
+        function validatePasswords() {
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const passwordError = document.getElementById('passwordError');
+
+            if (newPassword || confirmPassword) { // Check only if any of the fields are filled
+                if (newPassword !== confirmPassword) {
+                    passwordError.style.display = 'block';
+                    return false; // Prevent form submission
+                }
+            }
+
+            // Hide error message if passwords match or are not provided
+            passwordError.style.display = 'none';
+            return true;
+        }
+    </script>
+{% else %}
+    <p>You are not logged in. <a href="{{ url_for('login') }}">Login</a></p>
+{% endif %}
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>

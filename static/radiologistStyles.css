@@ -1,0 +1,124 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f8ff; /* Light blue background */
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 90%;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #007acc; /* Blue theme */
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+}
+
+header h1 {
+    margin: 0;
+}
+
+header a.logout {
+    background-color: #dc3545; /* Red for logout */
+    color: white;
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+}
+
+header a.logout:hover {
+    background-color: #a71d2a;
+}
+
+/* Profile Section */
+.profile {
+    display: flex;
+    margin-top: 20px;
+    gap: 20px;
+}
+
+.left, .right {
+    flex: 1;
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.left img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    margin-bottom: 15px;
+}
+
+.left button {
+    background-color: #007acc;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.left button:hover {
+    background-color: #005fa3;
+}
+
+/* Appointments Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+table th, table td {
+    border: 1px solid #ddd;
+    text-align: left;
+    padding: 10px;
+}
+
+table th {
+    background-color: #007acc;
+    color: white;
+}
+
+/* Appointment Buttons */
+.appointment-buttons button {
+    margin-right: 5px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.appointment-buttons .confirm {
+    background-color: #28a745; /* Green */
+    color: white;
+}
+
+.appointment-buttons .postpone {
+    background-color: #ffc107; /* Yellow */
+    color: black;
+}
+
+.appointment-buttons .cancel {
+    background-color: #dc3545; /* Red */
+    color: white;
+}
+
+footer {
+    text-align: center;
+    margin-top: 20px;
+}

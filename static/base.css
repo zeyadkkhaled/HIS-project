@@ -1,0 +1,94 @@
+.navbar-nav {
+    margin: auto; /* Center-align Home and Departments */
+}
+.navbar-brand img {
+    height: 30px; /* Adjust logo size */
+    margin-right: 8px;
+}
+footer {
+    background-color: #007bff; /* Blue background for the footer */
+    color: white;
+    padding: 10px;
+    margin-top: auto;
+    position: relative;
+}
+footer .social-icons i {
+    font-size: 1.5rem;
+    margin: 0 10px;
+    color: #ffffff;
+}
+
+
+.hamburger-menu {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+}
+.hamburger-menu:hover {
+    background-color: #0056b3;
+}
+.c{
+    padding-bottom: 10px;
+}
+.carousel-inner img {
+    width: 100%;
+    height: 500px; /* Set a fixed height for all carousel images */
+    object-fit: cover; /* Ensure images cover the area */
+}
+.c{
+    padding-bottom: 20px;
+    background-color: whitesmoke;
+
+}
+.carousel{
+    width: 100%;
+    height: 500px;
+    overflow: hidden;
+
+}
+.row1{
+    width: 100%;
+    --bs-gutter-x: 0rem;
+    box-shadow: 0 15px 8px rgba(0, 0, 0, 0.1);
+
+}
+.row{
+    background-color: #007bff;
+    --bs-gutter-x: 0rem;
+    width: 95%;
+    margin-left: 40px;
+    border: #007bff;
+    border-radius: 20px;
+    box-shadow: 0 15px 8px rgba(0, 0, 0, 0.1);
+
+
+}
+.col-md-4{
+    width: 300px;
+    margin:30px;
+    margin-left: 70px;
+    
+}
+.card{
+    background-color: #007bff; /* Change this to your desired hover color */
+    border-color: #007bff;
+   
+}
+.card:hover{
+    background-color: whitesmoke; /* Change this to your desired hover color */
+    transition: background-color 0.3s ease-in-out;
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+
+}
+.btn{
+    background-color: #007bff;
+    border-color:#007bff;
+}

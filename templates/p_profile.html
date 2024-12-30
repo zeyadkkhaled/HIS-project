@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Profile</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../styles/p_profile.css" rel="stylesheet">
+
+</head>
+<body>
+<div class="container">
+    <div class="profile-container d-flex">
+        <!-- Profile Header -->
+        <div class="profile-header text-center bg-white p-3 rounded shadow">
+            {% if userdata['profile_picture'] %}
+                <img src="{{ userdata['profile_picture'] }}" alt="Profile Picture" id="profilePicture"
+                     class="img-fluid rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover;">
+            {% else %}
+                <img src="static/images/uploadimage.png" alt="Profile Picture" id="profilePicture">
+            {% endif %}
+            <h3 class="mt-3" id="profileName">{{ userdata['firstname'] }}</h3>
+            <p class="text-muted">Patient ID: {{ userdata['patientid'] }}</p>
+            <div class="d-grid gap-2">
+                <!-- Edit Profile Picture -->
+                <form action="{{ url_for('upload_profile_picture') }}" method="post" enctype="multipart/form-data">
+                    {#\ this enc enables server to handle file uploads#}
+                    {% if msg %}
+                        <div class="alert alert-warning">{{ msg }}</div>
+                    {% endif %}
+                    <label for="editProfilePic" class="btn btn-primary">Change Profile Picture</label>
+                    <input type="file" id="editProfilePic" name="editProfilePic" class="form-control d-none"
+                           onchange="updateProfilePicture()">
+                    <button type="submit">Upload</button>
+                </form>
+
+                <!-- Edit Personal Information Button -->
+                <button class="btn btn-primary mt-2" id="editPersonalInfo" data-bs-toggle="modal"
+                        data-bs-target="#editInfoModal">Edit Personal Info
+                </button>
+                <button class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#editMedicalInfoModal">Edit
+                    Medical Info
+                </button>
+                <!-- logout button -->
+                <button class="btn btn-danger mt-2" id="logoutButton" onclick="location.href='/logout'">Logout</button>
+            </div>
+        </div>
+        <!-- Content -->
+        <div class="content flex-grow-1 ms-3">
+            <!-- Personal Information -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    Personal Information
+                </div>
+                <div class="card-body">
+                    <p><strong>Name:</strong> <span
+                            id="displayName">{{ userdata['firstname'] }} {{ userdata['lastname'] }}</span></p>
+                    <p><strong>Patient_ID:</strong> {{ userdata['patientid'] }}</p>
+                    <p><strong>Age:</strong> <span id="displayAge">{{ userdata['age'] }}</span></p>
+                    <p><strong>Gender:</strong> <span id="displayGender">{{ userdata['sex'] }}</span></p>
+                    <p><strong>Contact:</strong> {{ userdata['phonenumber'] }}</p>
+                    <p><strong>Address:</strong> {{ userdata['address'] }}</p>
+                </div>
+            </div>
+
+            <!-- Medical History -->
+            <div class="card mt-3">
+                <div class="card-header bg-danger text-white">
+                    Medical History
+                </div>
+                <div class="card-body">
+                    <ul>
+                        <li>Allergies: {{ userdata['allergies'] }}</li>
+                        <li>Chronic Conditions: {{ userdata['cc'] }}</li>
+                        <li>Past Treatments: {{ userdata['pastt'] }}</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- Appointments Card -->
+            <div class="card mt-3">
+                <div class="card-header bg-info text-white">
+                    Scheduled Appointments
+                </div>
+                <div class="card-body">
+                    <table class="table" id="appointmentsTable">
+                        <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Doctor</th>
+                            <th>Status</th>
+                            <th>Action</th> <!-- New column for actions -->
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for appointment in appointments %}
+                            <tr>
+                                <td>{{ appointment['appointmentdate'] }}</td>
+                                <td>{{ appointment['timeslot'] }}</td>
+                                <td>Dr.{{ appointment['radiologistname'] }}</td>
+                                <td>{{ appointment['status'] }}</td>
+                                <td>
+                                    <a class="btn btn-danger" href="/cancel_app/{{ appointment['appointmentid'] }}">Cancel</a>
+                                </td> <!-- Cancel button -->
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="text-center mt-3">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#makeAppointmentModal">
+                            Make an Appointment
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Add Files and Comments -->
+            <div class="card mt-3">
+                <div class="card-header bg-warning text-dark">
+                    Add Scans
+                </div>
+                <div class="card-body">
+                    <!-- Form for File Upload -->
+                    <form method="POST" action="/upload_scans" enctype="multipart/form-data">
+                        <!-- File Upload -->
+                        <div class="mb-3">
+                            <label for="fileUpload" class="form-label">Upload Medical Files</label>
+                            <input class="btn btn-upload" type="file" id="fileUpload" name="medical_files" required>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="text-center mt-3">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header bg-success text-dark">
+
+                    Add Requests and Inquiries
+                </div>
+                <div class="card-body">
+                    <form id="inquiryForm" action="/submit_inquiry" method="POST">
+                        {# request field#}
+                        <label for="inquiry">Your Inquiry:</label>
+                        <textarea id="inquiry" name="inquiry" rows="4" cols="50" oninput="limitWords(this, 50)"
+                                  placeholder="Type your inquiry here..."></textarea>
+                        <p id="inquiryWordCount">0 / 50 words</p>
+
+                            {# request field#}
+                        <label for="request">Your Request:</label>
+                        <textarea id="request" name="request" rows="4" cols="50"
+                                  oninput="limitWords(this, 50, 'request')"
+                                  placeholder="Type your request here..."></textarea>
+                        <p id="requestWordCount">0 / 50 words</p>
+
+                            <div class="text-center mt-3">
+                                <button type="submit" class="btn btn-primary" >Submit Inquiry and Request</button>
+                            </div>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script>
+    function limitWords(textarea, maxWords, type) {
+    const words = textarea.value.split(/\s+/).filter(function(word) {
+        return word.length > 0; // Filter out empty spaces
+    });
+
+    if (words.length > maxWords) {
+        words.length = maxWords; // Trim the array to the max word count
+    }
+
+    // Update the textarea value with the limited words
+    textarea.value = words.join(" ");
+
+    // Update the word count display
+    const wordCountElement = document.getElementById(type ? `${type}WordCount` : "inquiryWordCount");
+    wordCountElement.innerText = `${words.length} / ${maxWords} words`;
+}
+
+</script>
+<!-- Edit Personal Info Modal -->
+<div class="modal fade" id="editInfoModal" tabindex="-1" aria-labelledby="editInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editInfoModalLabel">Edit Personal Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editInfoForm" action="/edit_personal_info" method="POST"
+                      onsubmit="return validatePasswords()">
+
+                    <div class="mb-3">
+                        <label for="firstname" class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="firstname" name="firstname"
+                               value="{{ userdata['firstname'] }}" required>
+                    </div>
+
+
+                    <div class="mb-3">
+                        <label for="lastname" class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="lastname" name="lastname"
+                               value="{{ userdata['lastname'] }}" required>
+                    </div>
+
+
+                    <div class="mb-3">
+                        <label for="age" class="form-label">Age</label>
+                        <input type="number" class="form-control" id="age" name="age" value="{{ userdata['age'] }}"
+                               required>
+                    </div>
+
+
+                    <div class="mb-3">
+                        <label for="gender" class="form-label">Gender</label>
+                        <select class="form-select" id="gender" name="gender" required>
+                            <option value="Male" {% if userdata['gender'] == 'Male' %}selected{% endif %}>Male</option>
+                            <option value="Female" {% if userdata['gender'] == 'Female' %}selected{% endif %}>Female
+                            </option>
+                            <option value="Other" {% if userdata['gender'] == 'Other' %}selected{% endif %}>Other
+                            </option>
+                        </select>
+                    </div>
+
+
+                    <div class="mb-3">
+                        <label for="phonenumber" class="form-label">Contact</label>
+                        <input type="text" class="form-control" id="phonenumber" name="phonenumber"
+                               value="{{ userdata['phonenumber'] }}" required>
+                    </div>
+
+
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Address</label>
+                        <input type="text" class="form-control" id="address" name="address"
+                               value="{{ userdata['address'] }}" required>
+                    </div>
+
+
+                    <div class="mb-3">
+                        <label class="form-label">Change Password</label>
+                        <select class="form-select" id="changePasswordDropdown" onchange="togglePasswordFields()">
+                            <option value="no">Do not change</option>
+                            <option value="yes">Change Password</option>
+                        </select>
+                    </div>
+
+                    <div id="passwordFields" style="display: none;">
+
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">New Password</label>
+                            <input type="password" class="form-control" id="newPassword" name="newPassword">
+                        </div>
+
+
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword">
+                        </div>
+
+                        <div id="passwordError" class="text-danger" style="display: none;">
+                            Passwords do not match. Please try again.
+                        </div>
+                    </div>
+
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary btn-block">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Toggle visibility of password fields based on dropdown selection
+    function togglePasswordFields() {
+        const passwordFields = document.getElementById('passwordFields');
+        const changePasswordDropdown = document.getElementById('changePasswordDropdown');
+
+        if (changePasswordDropdown.value === 'yes') {
+            passwordFields.style.display = 'block';
+        } else {
+            passwordFields.style.display = 'none';
+        }
+    }
+
+    // Validate that the new password and confirm password match
+    function validatePasswords() {
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const passwordError = document.getElementById('passwordError');
+
+        if (newPassword || confirmPassword) { // Check only if any of the fields are filled
+            if (newPassword !== confirmPassword) {
+                passwordError.style.display = 'block';
+                return false; // Prevent form submission
+            }
+        }
+
+        // Hide error message if passwords match or are not provided
+        passwordError.style.display = 'none';
+        return true;
+    }
+</script>
+<div class="modal fade" id="editMedicalInfoModal" tabindex="-1" aria-labelledby="editMedicalInfoModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editMedicalInfoModalLabel">Edit Medical Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editMedicalInfoForm" action="/edit_medical_info" method="POST">
+                    <!-- Allergies -->
+                    <div class="mb-3">
+                        <label for="allergies" class="form-label">Allergies</label>
+                        <textarea
+                                class="form-control"
+                                id="allergies"
+                                name="allergies"
+                                rows="3"
+                                placeholder="Enter your allergy separated by commas"
+                                required>
+                        </textarea>
+                    </div>
+
+                    <!-- Chronic Conditions -->
+                    <div class="mb-3">
+                        <label for="chronicConditions" class="form-label">Chronic Conditions</label>
+                        <textarea
+                                class="form-control"
+                                id="chronicConditions"
+                                name="chronicConditions"
+                                rows="3"
+                                placeholder="Enter chronic conditions separated by commas"
+                                required>
+                        </textarea>
+                    </div>
+
+                    <!-- Past Treatments -->
+                    <div class="mb-3">
+                        <label for="pastTreatments" class="form-label">Past Treatments</label>
+                        <textarea
+                                class="form-control"
+                                id="pastTreatments"
+                                name="pastTreatments"
+                                rows="3"
+                                placeholder="Enter past treatments separated by commas"
+                                required>
+                        </textarea>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary btn-block">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Make Appointment Modal -->
+<div class="modal fade" id="makeAppointmentModal" tabindex="-1" aria-labelledby="makeAppointmentModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="makeAppointmentModalLabel">Schedule a New Appointment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="makeAppointmentForm" method="POST" action="/schedule_appointment">
+
+                    <!-- Date Input -->
+                    <div class="mb-3">
+                        <label for="appointmentDate" class="form-label">Date</label>
+                        <input
+                                type="date"
+                                class="form-control"
+                                id="appointmentDate"
+                                name="appointmentDate"
+                                required
+                                min="{{ today_date }}"
+                        >
+                    </div>
+
+                    <!-- Time Input -->
+                    <div class="mb-3">
+                        <label for="appointmentTime" class="form-label">Time</label>
+                        <input
+                                type="time"
+                                class="form-control"
+                                id="appointmentTime"
+                                name="appointmentTime"
+                                required
+                                min="09:00"
+                                max="17:00"
+                        >
+
+                    </div>
+
+                    <!-- Radiologist Dropdown -->
+                    <select class="form-control" id="doctorName" name="doctorName" required>
+                        <option value="" disabled selected>Select a Radiologist</option>
+                        {% for radiologist in radiologists %}
+                            <option value="{{ radiologist['radiologistid'] }}">{{ radiologist['firstname'] }} {{ radiologist['lastname'] }} </option>
+                        {% endfor %}
+                    </select>
+
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-success">Schedule Appointment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function updateProfilePicture() {
+        const fileInput = document.getElementById('editProfilePic');
+        const profilePicture = document.getElementById('profilePicture');
+        const file = fileInput.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                profilePicture.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    document.getElementById('saveChanges').addEventListener('click', function () {
+        const name = document.getElementById('inputName').value;
+        const age = document.getElementById('inputAge').value;
+        const gender = document.getElementById('inputGender').value;
+        const contact = document.getElementById('inputContact').value;
+        const address = document.getElementById('inputAddress').value;
+
+        document.getElementById('displayName').innerText = name;
+        document.getElementById('displayAge').innerText = age;
+        document.getElementById('displayGender').innerText = gender;
+
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editInfoModal'));
+        modal.hide();
+    });
+
+    document.getElementById('scheduleAppointment').addEventListener('click', function () {
+        // Get values from the form
+        const date = document.getElementById('appointmentDate').value;
+        const time = document.getElementById('appointmentTime').value;
+        const doctor = document.getElementById('doctorName').value;
+
+        // Validate inputs
+        if (!date || !time || !doctor) {
+            alert('Please fill in all fields.');
+            return;
+        }
+
+        // Create a new row in the appointments table
+        const table = document.getElementById('appointmentsTable').getElementsByTagName('tbody')[0];
+        const newRow = table.insertRow();
+
+        // Insert new cells for the new row
+        const dateCell = newRow.insertCell(0);
+        const timeCell = newRow.insertCell(1);
+        const doctorCell = newRow.insertCell(2);
+        const statusCell = newRow.insertCell(3);
+        const actionCell = newRow.insertCell(4);
+
+        // Set the cell values
+        dateCell.innerText = date;
+        timeCell.innerText = time;
+        doctorCell.innerText = doctor;
+        statusCell.innerText = 'Pending'; // Default status
+
+        // Create a cancel button
+        const cancelButton = document.createElement('button');
+        cancelButton.innerText = 'Cancel';
+        cancelButton.className = 'btn btn-danger btn-sm cancel-appointment';
+        cancelButton.onclick = function () {
+            table.deleteRow(newRow.rowIndex - 1); // Remove the row from the table
+        };
+
+        // Append the cancel button to the action cell
+        actionCell.appendChild(cancelButton);
+
+        // Close the modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('makeAppointmentModal'));
+        modal.hide();
+
+        // Clear the form inputs
+        document.getElementById('makeAppointmentForm').reset();
+    });
+</script>
+
+
+</body>
+</html>

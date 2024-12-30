@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}
+    Patients Appointments - HIS Admin
+{% endblock %}
+
+
+{% block content %}
+    <div class="container ">
+        <div id="adminsTable">
+            <h2>Patients Appointment</h2>
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th scope="col">Appointment ID</th>
+                    <th scope="col">Patient ID</th>
+                    <th scope="col">Patient Name</th>
+                    <th scope="col">Radiologist ID</th>
+                    <th scope="col">Radiologist Name</th>
+                    <th scope="col">Appointment Date</th>
+                    <th scope="col">Time Slot</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Action</th>
+
+
+                </tr>
+                </thead>
+                <tbody>
+                {% for appointment in appointments %}
+                    <tr>
+                        <td>{{ appointment['appointmentid'] }}</td>
+                        <td>{{ appointment['patientid'] }}</td>
+                        <td>{{ appointment['patientname'] }}</td>
+                        <td>{{ appointment['radiologistid'] }}</td>
+                        <td>{{ appointment['radiologistname'] }}</td>
+                        <td>{{ appointment['appointmentdate'] }}</td>
+                        <td>{{ appointment['timeslot'] }}</td>
+                        <td>{{ appointment['status'] }}</td>
+                        <td>
+                            <a class="btn btn-success" href="/action/{{ appointment['appointmentid'] }}/1">Confirm</a>
+                            <a class="btn btn-primary" href="/action/{{ appointment['appointmentid'] }}/2">Postpone</a>
+                            <a class="btn btn-danger" href="/action/{{ appointment['appointmentid'] }}/3">Cancel</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

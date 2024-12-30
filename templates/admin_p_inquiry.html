@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}
+    Patients Comments - HIS Admin
+{% endblock %}
+
+
+{% block content %}
+    <div class="container ">
+        <div id="adminsTable">
+            <h2>Patients Requests And Inquiry</h2>
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th scope="col">Patient ID</th>
+                    <th scope="col">Inquiry</th>
+                    <th scope="col">Request</th>
+                    <th scope="col">Time of Creation</th>
+
+                </tr>
+                </thead>
+                <tbody>
+                {% for inquiry in inquiries %}
+                    <tr>
+                        <td>{{ inquiry['patientid'] }}</td>
+                        <td>{{ inquiry['inquiry'] }}</td>
+                        <td>{{ inquiry['request'] }}</td>
+                        <td>{{ inquiry['created_at'] }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}
+    Add User - HIS Admin
+{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" href="static\add_user_styles.css">
+{% endblock %}
+
+
+{% block content %}
+    <div class="container">
+        <h1>Add User</h1>
+        <form action="/add-user" method="POST">
+            {% if msg %}
+                <div class="alert alert-warning">{{ msg }}</div>
+            {% endif %}
+            <div class="form-group">
+                <label for="first-name">First Name</label>
+                <input type="text" id="firstname" name="firstname" placeholder="Enter first name" required>
+            </div>
+            <div class="form-group">
+                <label for="last-name">Last Name</label>
+                <input type="text" id="lastname" name="lastname" placeholder="Enter last name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="Enter email address" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter Password" required>
+            </div>
+
+            <div class="form-group-inline">
+                <div>
+                    <label for="sex" id="sex">Sex</label>
+                    <select id="sex" name="sex" required>
+                        <option value="">Select sex</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="role">Role</label>
+                    <select id="role" name="role" required>
+                        <option value="">Select role</option>
+                        <option value="admin">Admin</option>
+                        <option value="patient">Patient</option>
+                        <option value="radiologist">Radiologist</option>
+
+
+                    </select>
+                </div>
+            </div>
+            <button type="submit">Add User</button>
+        </form>
+    </div>
+{% endblock %}

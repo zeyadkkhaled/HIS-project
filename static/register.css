@@ -1,0 +1,49 @@
+.navbar-nav {
+    margin: auto; /* Center-align Home and Departments */
+}
+
+.navbar-brand img {
+    height: 30px; /* Adjust logo size */
+    margin-right: 8px;
+}
+
+footer {
+    background-color: #007bff; /* Blue background for the footer */
+    color: white;
+    padding: 20px;
+    margin-top: auto;
+    position: relative;
+}
+
+footer .social-icons i {
+    font-size: 1.5rem;
+    margin: 0 10px;
+    color: #ffffff;
+}
+
+body, html {
+    height: 100%;
+    margin: 0;
+}
+
+.content {
+    min-height: 100%; /* Make sure the content area stretches */
+    padding-bottom: 100px; /* Ensure the footer does not overlap */
+}
+
+.hamburger-menu {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+}
+
+.hamburger-menu:hover {
+    background-color: #0056b3;
+}
